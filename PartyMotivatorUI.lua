@@ -412,14 +412,20 @@ function PartyMotivatorUI:CreateStyledButton(parent, text, width, height)
     btnText:SetText(text)
     btnText:SetTextColor(1, 1, 1)
     
+    -- Eigene Hintergrund-Textur für Hover-Effekte
+    btn.bg = btn:CreateTexture(nil, "BACKGROUND")
+    btn.bg:SetAllPoints()
+    btn.bg:SetColorTexture(0.2, 0.4, 0.8, 0.6)
+    btn.bg:SetDrawLayer("BACKGROUND", -1) -- Hinter dem Standard-Button-Design
+    
     -- Hover-Effekte
     btn:SetScript("OnEnter", function()
-        btn:SetBackdropColor(0.3, 0.6, 1, 0.8)
+        btn.bg:SetColorTexture(0.3, 0.6, 1, 0.8)
         btnText:SetTextColor(1, 1, 0.8)
     end)
     
     btn:SetScript("OnLeave", function()
-        btn:SetBackdropColor(0.2, 0.4, 0.8, 0.6)
+        btn.bg:SetColorTexture(0.2, 0.4, 0.8, 0.6)
         btnText:SetTextColor(1, 1, 1)
     end)
     
