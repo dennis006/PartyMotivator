@@ -62,20 +62,31 @@ local function initializeDatabase()
         PartyMotivatorDB = {}
     end
     
-    -- Stelle sicher, dass alle erforderlichen Tabellen existieren
-    PartyMotivatorDB.startMessages = PartyMotivatorDB.startMessages or CopyTable(defaultDB.startMessages)
-    PartyMotivatorDB.greetMessages = PartyMotivatorDB.greetMessages or CopyTable(defaultDB.greetMessages)
-    PartyMotivatorDB.useInstanceChat = (PartyMotivatorDB.useInstanceChat ~= nil) and PartyMotivatorDB.useInstanceChat or defaultDB.useInstanceChat
+    -- Prüfe, ob die Datenbank leer ist oder nur alte Daten hat
+    local needsUpdate = false
     
-    -- Zusätzliche Sicherheitsprüfung für Tabellen
-    if type(PartyMotivatorDB.startMessages) ~= "table" then
+    -- Prüfe Start-Sprüche
+    if not PartyMotivatorDB.startMessages or type(PartyMotivatorDB.startMessages) ~= "table" or #PartyMotivatorDB.startMessages < 10 then
         PartyMotivatorDB.startMessages = CopyTable(defaultDB.startMessages)
+        needsUpdate = true
     end
-    if type(PartyMotivatorDB.greetMessages) ~= "table" then
+    
+    -- Prüfe Begrüßungen
+    if not PartyMotivatorDB.greetMessages or type(PartyMotivatorDB.greetMessages) ~= "table" or #PartyMotivatorDB.greetMessages < 10 then
         PartyMotivatorDB.greetMessages = CopyTable(defaultDB.greetMessages)
+        needsUpdate = true
+    end
+    
+    -- Prüfe Chat-Einstellung
+    if type(PartyMotivatorDB.useInstanceChat) ~= "boolean" then
+        PartyMotivatorDB.useInstanceChat = defaultDB.useInstanceChat
+        needsUpdate = true
     end
     
     -- Debug-Ausgabe
+    if needsUpdate then
+        print("|cff00ff00PartyMotivator|r - Datenbank aktualisiert mit neuen Sprüchen!")
+    end
     print(string.format("|cff00ff00PartyMotivator|r - Datenbank initialisiert: %d Start-Sprüche, %d Begrüßungen", 
         #PartyMotivatorDB.startMessages, #PartyMotivatorDB.greetMessages))
 end
@@ -143,6 +154,7 @@ local function handleSlashCommand(msg)
         print("|cffffffff/pm chat|r - Wechsle zwischen INSTANCE_CHAT und PARTY")
         print("|cffffffff/pm greet add <nachricht>|r - Füge eine neue Begrüßung hinzu")
         print("|cffffffff/pm greet remove <nummer>|r - Entferne eine Begrüßung")
+        print("|cffffffff/pm reset|r - Setze Sprüche auf Standard zurück")
         return
     end
     
@@ -237,6 +249,14 @@ local function handleSlashCommand(msg)
         else
             print("|cffff0000Fehler:|r Unbekannter Befehl. Verwende 'add' oder 'remove'")
         end
+        
+    elseif command == "reset" then
+        -- Setze Sprüche auf Standard zurück
+        PartyMotivatorDB.startMessages = CopyTable(defaultDB.startMessages)
+        PartyMotivatorDB.greetMessages = CopyTable(defaultDB.greetMessages)
+        print("|cff00ff00PartyMotivator|r - Sprüche auf Standard zurückgesetzt!")
+        print(string.format("|cff00ff00PartyMotivator|r - %d Start-Sprüche, %d Begrüßungen geladen", 
+            #PartyMotivatorDB.startMessages, #PartyMotivatorDB.greetMessages))
         
     else
         print("|cffff0000Fehler:|r Unbekannter Befehl. Verwende /pm für Hilfe.")
