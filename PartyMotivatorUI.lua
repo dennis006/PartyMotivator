@@ -327,8 +327,46 @@ function PartyMotivatorUI:ShowSettingsTab()
     local resetBtn = self:CreateStyledButton(self.contentArea, "Auf Standard zurücksetzen", 200, 35)
     resetBtn:SetPoint("TOPLEFT", 20, -150)
     resetBtn:SetScript("OnClick", function()
-        PartyMotivatorDB.startMessages = CopyTable(PartyMotivatorDB.defaultDB.startMessages)
-        PartyMotivatorDB.greetMessages = CopyTable(PartyMotivatorDB.defaultDB.greetMessages)
+        -- Lade die Standard-Daten aus der Hauptdatei
+        local defaultDB = {
+            startMessages = {
+                "Let's go!",
+                "Auf geht's, wir schaffen das!",
+                "Zeit für Action!",
+                "Bereit für den Kampf!",
+                "Gemeinsam sind wir stark!",
+                "Zeit zu glänzen!",
+                "Los geht's, Abenteurer!",
+                "Ready for battle!",
+                "Time to shine!",
+                "Let's do this!",
+                "We got this!",
+                "Time for action!",
+                "Let's make it count!",
+                "Here we go!",
+                "Let's crush this!"
+            },
+            greetMessages = {
+                "Hello!",
+                "Hey there!",
+                "Welcome!",
+                "Nice to meet you!",
+                "Hey, welcome aboard!",
+                "Hello there!",
+                "Welcome to the team!",
+                "Hey, good to see you!",
+                "Hello, welcome!",
+                "Hey, nice to have you!",
+                "Hey everyone, welcome aboard!",
+                "Hello team! Ready to conquer this place?",
+                "Welcome! Let's make this run legendary!",
+                "Hi all — great to have you here!",
+                "Greetings adventurers! Ready for some fun?"
+            }
+        }
+        
+        PartyMotivatorDB.startMessages = CopyTable(defaultDB.startMessages)
+        PartyMotivatorDB.greetMessages = CopyTable(defaultDB.greetMessages)
         print("|cff00ff00PartyMotivator|r - Alle Einstellungen auf Standard zurückgesetzt!")
     end)
     
