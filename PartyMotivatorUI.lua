@@ -123,26 +123,26 @@ function PartyMotivatorUI:CreateTab(text, index, onClick)
     tab:SetPoint("LEFT", 10 + (index * 170), 0)
     
     -- Tab-Hintergrund
-    local tabBg = tab:CreateTexture(nil, "BACKGROUND")
-    tabBg:SetAllPoints()
-    tabBg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
+    tab.bg = tab:CreateTexture(nil, "BACKGROUND")
+    tab.bg:SetAllPoints()
+    tab.bg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
     
     -- Tab-Text
-    local tabText = tab:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    tabText:SetPoint("CENTER")
-    tabText:SetText(text)
-    tabText:SetTextColor(0.8, 0.8, 0.8)
+    tab.text = tab:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    tab.text:SetPoint("CENTER")
+    tab.text:SetText(text)
+    tab.text:SetTextColor(0.8, 0.8, 0.8)
     
     -- Hover-Effekte
     tab:SetScript("OnEnter", function()
-        tabBg:SetColorTexture(0.2, 0.4, 0.8, 0.8)
-        tabText:SetTextColor(1, 1, 1)
+        tab.bg:SetColorTexture(0.2, 0.4, 0.8, 0.8)
+        tab.text:SetTextColor(1, 1, 1)
     end)
     
     tab:SetScript("OnLeave", function()
         if self.activeTab ~= tab then
-            tabBg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
-            tabText:SetTextColor(0.8, 0.8, 0.8)
+            tab.bg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
+            tab.text:SetTextColor(0.8, 0.8, 0.8)
         end
     end)
     
@@ -160,17 +160,17 @@ end
 function PartyMotivatorUI:SetActiveTab(tab)
     -- Reset alle Tabs
     for _, t in pairs({self.startTab, self.greetTab, self.settingsTab, self.statsTab}) do
-        local bg = t:GetRegions()
-        local text = t:GetFontString()
-        bg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
-        text:SetTextColor(0.8, 0.8, 0.8)
+        if t and t.bg and t.text then
+            t.bg:SetColorTexture(0.1, 0.2, 0.4, 0.6)
+            t.text:SetTextColor(0.8, 0.8, 0.8)
+        end
     end
     
     -- Aktiviere gewählten Tab
-    local bg = tab:GetRegions()
-    local text = tab:GetFontString()
-    bg:SetColorTexture(0.3, 0.6, 1, 0.9)
-    text:SetTextColor(1, 1, 1)
+    if tab and tab.bg and tab.text then
+        tab.bg:SetColorTexture(0.3, 0.6, 1, 0.9)
+        tab.text:SetTextColor(1, 1, 1)
+    end
     
     self.activeTab = tab
 end
