@@ -155,6 +155,7 @@ local function handleSlashCommand(msg)
         print("|cffffffff/pm greet add <nachricht>|r - Füge eine neue Begrüßung hinzu")
         print("|cffffffff/pm greet remove <nummer>|r - Entferne eine Begrüßung")
         print("|cffffffff/pm reset|r - Setze Sprüche auf Standard zurück")
+        print("|cffffffff/pmoptions|r oder |cffffffff/pmui|r - Öffne das schöne UI")
         return
     end
     
@@ -307,90 +308,384 @@ PM:RegisterEvent("CHALLENGE_MODE_START")
 PM:SetScript("OnEvent", onEvent)
 
 --[[
-    Initialisiert das Options-Panel für das Interface-Menü
-    Erstellt Checkbox, EditBox, Button und Sprüche-Liste
+    Erstellt ein schönes, eigenes UI für PartyMotivator
+    Moderne Optik mit Animationen und besserem Layout
 ]]
-function PM:InitializeOptions()
-    -- Hauptpanel
-    self.optionsPanel = CreateFrame("Frame")
-    self.optionsPanel.name = "PartyMotivator"
+function PM:CreateCustomUI()
+    -- Hauptfenster
+    self.mainFrame = CreateFrame("Frame", "PartyMotivatorMainFrame", UIParent)
+    self.mainFrame:SetSize(600, 500)
+    self.mainFrame:SetPoint("CENTER")
+    self.mainFrame:SetFrameStrata("DIALOG")
+    self.mainFrame:SetFrameLevel(100)
+    self.mainFrame:Hide()
     
-    -- Titel
-    local title = self.optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 20, -20)
-    title:SetText("PartyMotivator Einstellungen")
+    -- Hintergrund mit schönem Design
+    local bg = self.mainFrame:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.1, 0.1, 0.2, 0.95)
     
-    -- Checkbox: Instanz-Chat
-    local cb = CreateFrame("CheckButton", nil, self.optionsPanel, "InterfaceOptionsCheckButtonTemplate")
-    cb:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -30)
-    cb.Text:SetText("Instanz-Chat statt Party-Chat nutzen")
-    cb:SetChecked(PartyMotivatorDB.useInstanceChat)
-    cb:HookScript("OnClick", function()
-        PartyMotivatorDB.useInstanceChat = cb:GetChecked()
+    -- Rahmen
+    local border = self.mainFrame:CreateTexture(nil, "BORDER")
+    border:SetAllPoints()
+    border:SetColorTexture(0.3, 0.3, 0.6, 1)
+    
+    -- Titel-Bar
+    local titleBar = CreateFrame("Frame", nil, self.mainFrame)
+    titleBar:SetSize(600, 40)
+    titleBar:SetPoint("TOP")
+    titleBar:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Header",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 }
+    })
+    
+    -- Titel-Text
+    local titleText = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    titleText:SetPoint("CENTER")
+    titleText:SetText("|cff00ff00Party|r|cffff6600Motivator|r")
+    titleText:SetTextColor(1, 1, 1)
+    
+    -- Schließen-Button
+    local closeBtn = CreateFrame("Button", nil, titleBar, "UIPanelCloseButton")
+    closeBtn:SetPoint("TOPRIGHT", -5, -5)
+    closeBtn:SetScript("OnClick", function()
+        self.mainFrame:Hide()
     end)
     
-    -- Eingabe-Feld für neue Sprüche
-    local eb = CreateFrame("EditBox", nil, self.optionsPanel, "InputBoxTemplate")
-    eb:SetSize(300, 20)
-    eb:SetPoint("TOPLEFT", cb, "BOTTOMLEFT", 0, -40)
-    eb:SetAutoFocus(false)
-    eb:SetText("")
+    -- Tab-System
+    self:CreateTabs()
     
-    -- Label für EditBox
-    local ebLabel = self.optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    ebLabel:SetPoint("BOTTOMLEFT", eb, "TOPLEFT", 0, 5)
-    ebLabel:SetText("Neuen Spruch hinzufügen:")
+    -- Content-Bereich
+    self.contentArea = CreateFrame("Frame", nil, self.mainFrame)
+    self.contentArea:SetSize(580, 420)
+    self.contentArea:SetPoint("TOP", 0, -50)
     
-    -- Button "Hinzufügen"
-    local addBtn = CreateFrame("Button", nil, self.optionsPanel, "UIPanelButtonTemplate")
-    addBtn:SetPoint("LEFT", eb, "RIGHT", 10, 0)
+    -- Initiale Anzeige
+    self:ShowStartMessagesTab()
+end
+
+--[[
+    Erstellt das Tab-System für verschiedene Bereiche
+]]
+function PM:CreateTabs()
+    self.tabFrame = CreateFrame("Frame", nil, self.mainFrame)
+    self.tabFrame:SetSize(580, 30)
+    self.tabFrame:SetPoint("TOP", 0, -45)
+    
+    -- Start-Sprüche Tab
+    self.startTab = CreateFrame("Button", nil, self.tabFrame)
+    self.startTab:SetSize(120, 25)
+    self.startTab:SetPoint("LEFT", 10, 0)
+    self.startTab:SetText("Start-Sprüche")
+    self.startTab:SetNormalFontObject("GameFontNormal")
+    self.startTab:SetHighlightFontObject("GameFontHighlight")
+    self.startTab:SetScript("OnClick", function()
+        self:ShowStartMessagesTab()
+    end)
+    
+    -- Begrüßungen Tab
+    self.greetTab = CreateFrame("Button", nil, self.tabFrame)
+    self.greetTab:SetSize(120, 25)
+    self.greetTab:SetPoint("LEFT", self.startTab, "RIGHT", 5, 0)
+    self.greetTab:SetText("Begrüßungen")
+    self.greetTab:SetNormalFontObject("GameFontNormal")
+    self.greetTab:SetHighlightFontObject("GameFontHighlight")
+    self.greetTab:SetScript("OnClick", function()
+        self:ShowGreetingsTab()
+    end)
+    
+    -- Einstellungen Tab
+    self.settingsTab = CreateFrame("Button", nil, self.tabFrame)
+    self.settingsTab:SetSize(120, 25)
+    self.settingsTab:SetPoint("LEFT", self.greetTab, "RIGHT", 5, 0)
+    self.settingsTab:SetText("Einstellungen")
+    self.settingsTab:SetNormalFontObject("GameFontNormal")
+    self.settingsTab:SetHighlightFontObject("GameFontHighlight")
+    self.settingsTab:SetScript("OnClick", function()
+        self:ShowSettingsTab()
+    end)
+end
+
+--[[
+    Zeigt den Start-Sprüche Tab
+]]
+function PM:ShowStartMessagesTab()
+    -- Lösche vorherigen Content
+    self:ClearContentArea()
+    
+    -- Titel
+    local title = self.contentArea:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 20, -20)
+    title:SetText("|cffff6600Start-Sprüche|r")
+    title:SetTextColor(1, 0.4, 0)
+    
+    -- Hinzufügen-Bereich
+    local addFrame = CreateFrame("Frame", nil, self.contentArea)
+    addFrame:SetSize(560, 60)
+    addFrame:SetPoint("TOPLEFT", 20, -60)
+    
+    -- Eingabe-Feld
+    local editBox = CreateFrame("EditBox", nil, addFrame, "InputBoxTemplate")
+    editBox:SetSize(400, 25)
+    editBox:SetPoint("LEFT", 0, 0)
+    editBox:SetAutoFocus(false)
+    editBox:SetText("")
+    
+    -- Hinzufügen-Button
+    local addBtn = CreateFrame("Button", nil, addFrame, "UIPanelButtonTemplate")
+    addBtn:SetSize(100, 25)
+    addBtn:SetPoint("LEFT", editBox, "RIGHT", 10, 0)
     addBtn:SetText("Hinzufügen")
     addBtn:SetScript("OnClick", function()
-        local text = eb:GetText()
+        local text = editBox:GetText()
         if text ~= "" then
-            -- Stelle sicher, dass die Tabelle existiert
             if not PartyMotivatorDB.startMessages then
                 PartyMotivatorDB.startMessages = {}
             end
             table.insert(PartyMotivatorDB.startMessages, text)
-            eb:SetText("")
-            -- Aktualisiere die Anzeige
-            PM:UpdateOptionsDisplay()
+            editBox:SetText("")
+            self:UpdateStartMessagesList()
         end
     end)
     
-    -- Anzeige der Anzahl gespeicherter Sprüche
-    self.countText = self.optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    self.countText:SetPoint("TOPLEFT", eb, "BOTTOMLEFT", 0, -30)
+    -- Sprüche-Liste
+    self.startMessagesList = CreateFrame("ScrollFrame", nil, self.contentArea, "UIPanelScrollFrameTemplate")
+    self.startMessagesList:SetSize(560, 300)
+    self.startMessagesList:SetPoint("TOPLEFT", 20, -130)
     
-    -- ScrollFrame für Sprüche-Liste
-    local scrollFrame = CreateFrame("ScrollFrame", nil, self.optionsPanel, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", self.countText, "BOTTOMLEFT", 0, -20)
-    scrollFrame:SetSize(400, 200)
+    self.startMessagesContent = CreateFrame("Frame", nil, self.startMessagesList)
+    self.startMessagesContent:SetSize(540, 1)
+    self.startMessagesList:SetScrollChild(self.startMessagesContent)
     
-    -- Content-Frame für die Sprüche
-    self.contentFrame = CreateFrame("Frame", nil, scrollFrame)
-    self.contentFrame:SetSize(380, 1)
-    scrollFrame:SetScrollChild(self.contentFrame)
+    -- Update die Liste
+    self:UpdateStartMessagesList()
+end
+
+--[[
+    Zeigt den Begrüßungen Tab
+]]
+function PM:ShowGreetingsTab()
+    -- Lösche vorherigen Content
+    self:ClearContentArea()
     
-    -- Slider für ScrollFrame
-    local slider = scrollFrame.ScrollBar
-    slider:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", 0, -16)
-    slider:SetPoint("BOTTOMRIGHT", scrollFrame, "BOTTOMRIGHT", 0, 16)
+    -- Titel
+    local title = self.contentArea:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 20, -20)
+    title:SetText("|cff00ff00Begrüßungen|r")
+    title:SetTextColor(0, 1, 0)
     
-    -- Label für Sprüche-Liste
-    local listLabel = self.optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    listLabel:SetPoint("BOTTOMLEFT", scrollFrame, "TOPLEFT", 0, 5)
-    listLabel:SetText("Gespeicherte Sprüche:")
+    -- Hinzufügen-Bereich
+    local addFrame = CreateFrame("Frame", nil, self.contentArea)
+    addFrame:SetSize(560, 60)
+    addFrame:SetPoint("TOPLEFT", 20, -60)
+    
+    -- Eingabe-Feld
+    local editBox = CreateFrame("EditBox", nil, addFrame, "InputBoxTemplate")
+    editBox:SetSize(400, 25)
+    editBox:SetPoint("LEFT", 0, 0)
+    editBox:SetAutoFocus(false)
+    editBox:SetText("")
+    
+    -- Hinzufügen-Button
+    local addBtn = CreateFrame("Button", nil, addFrame, "UIPanelButtonTemplate")
+    addBtn:SetSize(100, 25)
+    addBtn:SetPoint("LEFT", editBox, "RIGHT", 10, 0)
+    addBtn:SetText("Hinzufügen")
+    addBtn:SetScript("OnClick", function()
+        local text = editBox:GetText()
+        if text ~= "" then
+            if not PartyMotivatorDB.greetMessages then
+                PartyMotivatorDB.greetMessages = {}
+            end
+            table.insert(PartyMotivatorDB.greetMessages, text)
+            editBox:SetText("")
+            self:UpdateGreetingsList()
+        end
+    end)
+    
+    -- Begrüßungen-Liste
+    self.greetingsList = CreateFrame("ScrollFrame", nil, self.contentArea, "UIPanelScrollFrameTemplate")
+    self.greetingsList:SetSize(560, 300)
+    self.greetingsList:SetPoint("TOPLEFT", 20, -130)
+    
+    self.greetingsContent = CreateFrame("Frame", nil, self.greetingsList)
+    self.greetingsContent:SetSize(540, 1)
+    self.greetingsList:SetScrollChild(self.greetingsContent)
+    
+    -- Update die Liste
+    self:UpdateGreetingsList()
+end
+
+--[[
+    Zeigt den Einstellungen Tab
+]]
+function PM:ShowSettingsTab()
+    -- Lösche vorherigen Content
+    self:ClearContentArea()
+    
+    -- Titel
+    local title = self.contentArea:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOPLEFT", 20, -20)
+    title:SetText("|cff9966ffEinstellungen|r")
+    title:SetTextColor(0.6, 0.4, 1)
+    
+    -- Chat-Kanal Einstellung
+    local chatFrame = CreateFrame("Frame", nil, self.contentArea)
+    chatFrame:SetSize(560, 40)
+    chatFrame:SetPoint("TOPLEFT", 20, -60)
+    
+    local chatLabel = chatFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    chatLabel:SetPoint("LEFT", 0, 0)
+    chatLabel:SetText("Chat-Kanal für Nachrichten:")
+    
+    local chatCheckbox = CreateFrame("CheckButton", nil, chatFrame, "InterfaceOptionsCheckButtonTemplate")
+    chatCheckbox:SetPoint("LEFT", chatLabel, "RIGHT", 10, 0)
+    chatCheckbox.Text:SetText("Instanz-Chat statt Party-Chat nutzen")
+    chatCheckbox:SetChecked(PartyMotivatorDB.useInstanceChat)
+    chatCheckbox:SetScript("OnClick", function()
+        PartyMotivatorDB.useInstanceChat = chatCheckbox:GetChecked()
+    end)
+    
+    -- Reset-Button
+    local resetBtn = CreateFrame("Button", nil, self.contentArea, "UIPanelButtonTemplate")
+    resetBtn:SetSize(150, 30)
+    resetBtn:SetPoint("TOPLEFT", 20, -120)
+    resetBtn:SetText("Auf Standard zurücksetzen")
+    resetBtn:SetScript("OnClick", function()
+        PartyMotivatorDB.startMessages = CopyTable(defaultDB.startMessages)
+        PartyMotivatorDB.greetMessages = CopyTable(defaultDB.greetMessages)
+        print("|cff00ff00PartyMotivator|r - Alle Einstellungen auf Standard zurückgesetzt!")
+    end)
+    
+    -- Info-Text
+    local infoText = self.contentArea:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    infoText:SetPoint("TOPLEFT", 20, -170)
+    infoText:SetText("|cffccccccVerwende /pm für Chat-Befehle oder /pmoptions für dieses UI|r")
+    infoText:SetTextColor(0.8, 0.8, 0.8)
+end
+
+--[[
+    Löscht den Content-Bereich
+]]
+function PM:ClearContentArea()
+    if self.contentArea then
+        local children = {self.contentArea:GetChildren()}
+        for i = 1, #children do
+            local child = children[i]
+            if child then
+                child:Hide()
+                child:SetParent(nil)
+            end
+        end
+    end
+end
+
+--[[
+    Aktualisiert die Start-Sprüche Liste
+]]
+function PM:UpdateStartMessagesList()
+    if not self.startMessagesContent then return end
+    
+    -- Lösche alte Einträge
+    local children = {self.startMessagesContent:GetChildren()}
+    for i = 1, #children do
+        local child = children[i]
+        if child then
+            child:Hide()
+            child:SetParent(nil)
+        end
+    end
+    
+    local startMessages = PartyMotivatorDB.startMessages or {}
+    local yOffset = 0
+    
+    for i, message in ipairs(startMessages) do
+        -- Spruch-Text
+        local msgText = self.startMessagesContent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        msgText:SetPoint("TOPLEFT", 0, -yOffset)
+        msgText:SetText(string.format("|cffffcc00%d.|r %s", i, message))
+        msgText:SetWidth(400)
+        msgText:SetJustifyH("LEFT")
+        
+        -- Entfernen-Button
+        local removeBtn = CreateFrame("Button", nil, self.startMessagesContent, "UIPanelButtonTemplate")
+        removeBtn:SetSize(80, 20)
+        removeBtn:SetPoint("LEFT", msgText, "RIGHT", 10, 0)
+        removeBtn:SetText("Entfernen")
+        removeBtn:SetScript("OnClick", function()
+            table.remove(PartyMotivatorDB.startMessages, i)
+            self:UpdateStartMessagesList()
+        end)
+        
+        yOffset = yOffset + 25
+    end
+    
+    self.startMessagesContent:SetHeight(math.max(300, yOffset))
+end
+
+--[[
+    Aktualisiert die Begrüßungen Liste
+]]
+function PM:UpdateGreetingsList()
+    if not self.greetingsContent then return end
+    
+    -- Lösche alte Einträge
+    local children = {self.greetingsContent:GetChildren()}
+    for i = 1, #children do
+        local child = children[i]
+        if child then
+            child:Hide()
+            child:SetParent(nil)
+        end
+    end
+    
+    local greetMessages = PartyMotivatorDB.greetMessages or {}
+    local yOffset = 0
+    
+    for i, message in ipairs(greetMessages) do
+        -- Spruch-Text
+        local msgText = self.greetingsContent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        msgText:SetPoint("TOPLEFT", 0, -yOffset)
+        msgText:SetText(string.format("|cff00ff00%d.|r %s", i, message))
+        msgText:SetWidth(400)
+        msgText:SetJustifyH("LEFT")
+        
+        -- Entfernen-Button
+        local removeBtn = CreateFrame("Button", nil, self.greetingsContent, "UIPanelButtonTemplate")
+        removeBtn:SetSize(80, 20)
+        removeBtn:SetPoint("LEFT", msgText, "RIGHT", 10, 0)
+        removeBtn:SetText("Entfernen")
+        removeBtn:SetScript("OnClick", function()
+            table.remove(PartyMotivatorDB.greetMessages, i)
+            self:UpdateGreetingsList()
+        end)
+        
+        yOffset = yOffset + 25
+    end
+    
+    self.greetingsContent:SetHeight(math.max(300, yOffset))
+end
+
+--[[
+    Initialisiert das Options-Panel für das Interface-Menü (für Kompatibilität)
+]]
+function PM:InitializeOptions()
+    -- Erstelle das schöne UI
+    self:CreateCustomUI()
+    
+    -- Erstelle auch das Standard-Panel für Kompatibilität
+    self.optionsPanel = CreateFrame("Frame")
+    self.optionsPanel.name = "PartyMotivator"
     
     -- Panel mit neuer Settings-API registrieren
     local category = Settings.RegisterCanvasLayoutCategory(self.optionsPanel, self.optionsPanel.name)
-    category.ID = self.optionsPanel.name   -- wichtig für das spätere Öffnen
+    category.ID = self.optionsPanel.name
     Settings.RegisterAddOnCategory(category)
-    self.settingsCategory = category       -- speichere die Kategorie, falls benötigt
-    
-    -- Initiale Anzeige aktualisieren
-    self:UpdateOptionsDisplay()
+    self.settingsCategory = category
 end
 
 --[[
@@ -494,9 +789,20 @@ SlashCmdList["PARTYMOTIVATOR"] = handleSlashCommand
 
 SLASH_PMOPTIONS1 = "/pmoptions"
 SlashCmdList["PMOPTIONS"] = function()
-    if PM.optionsPanel and PM.optionsPanel.name then
-        -- Öffnet das Panel über den Namen der Kategorie
+    if PM.mainFrame then
+        -- Öffne das schöne Custom UI
+        PM.mainFrame:Show()
+    elseif PM.optionsPanel and PM.optionsPanel.name then
+        -- Fallback: Öffne das Standard-Panel
         Settings.OpenToCategory(PM.optionsPanel.name)
+    end
+end
+
+-- Zusätzlicher Slash-Command für das schöne UI
+SLASH_PARTYMOTIVATORUI1 = "/pmui"
+SlashCmdList["PARTYMOTIVATORUI"] = function()
+    if PM.mainFrame then
+        PM.mainFrame:Show()
     end
 end
 
