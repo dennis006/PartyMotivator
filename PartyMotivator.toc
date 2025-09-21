@@ -1,0 +1,7 @@
+## Interface: 120000
+## Title: PartyMotivator
+## Author: xMethface
+## Version: 1.0
+## Notes: Sendet motivierende Sprüche beim Dungeon-Start und begrüßt neue Gruppenmitglieder.
+## SavedVariables: PartyMotivatorDB
+PartyMotivator.lua
