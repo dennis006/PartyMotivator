@@ -5,3 +5,4 @@
 ## Notes: Sendet motivierende Sprüche beim Dungeon-Start und begrüßt neue Gruppenmitglieder.
 ## SavedVariables: PartyMotivatorDB
 PartyMotivator.lua
+PartyMotivatorUI.lua
