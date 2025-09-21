@@ -74,6 +74,10 @@ local function initializeDatabase()
     if type(PartyMotivatorDB.greetMessages) ~= "table" then
         PartyMotivatorDB.greetMessages = CopyTable(defaultDB.greetMessages)
     end
+    
+    -- Debug-Ausgabe
+    print(string.format("|cff00ff00PartyMotivator|r - Datenbank initialisiert: %d Start-Sprüche, %d Begrüßungen", 
+        #PartyMotivatorDB.startMessages, #PartyMotivatorDB.greetMessages))
 end
 
 --[[
@@ -382,11 +386,12 @@ function PM:UpdateOptionsDisplay()
     -- Aktualisiere Anzahl-Text
     self.countText:SetText(string.format("Start-Sprüche: %d | Begrüßungen: %d", #startMessages, #greetMessages))
     
-    -- Debug-Ausgabe (kann später entfernt werden)
+    -- Debug-Ausgabe
     print(string.format("|cff00ff00PartyMotivator|r - UI Update: %d Start-Sprüche, %d Begrüßungen", #startMessages, #greetMessages))
     
-    -- Lösche alte Sprüche-Anzeige
+    -- Lösche alte Sprüche-Anzeige komplett
     if self.contentFrame then
+        -- Alle Kinder des Content-Frames löschen
         local children = {self.contentFrame:GetChildren()}
         for i = 1, #children do
             local child = children[i]
@@ -400,13 +405,14 @@ function PM:UpdateOptionsDisplay()
     -- Erstelle neue Sprüche-Anzeige
     local yOffset = 0
     
-    -- Start-Sprüche
+    -- Start-Sprüche Label
     local startLabel = self.contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     startLabel:SetPoint("TOPLEFT", 0, -yOffset)
     startLabel:SetText("Start-Sprüche:")
     startLabel:SetTextColor(1, 1, 0)
     yOffset = yOffset + 25
     
+    -- Start-Sprüche anzeigen
     for i, message in ipairs(startMessages) do
         -- Spruch-Text
         local msgText = self.contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -428,7 +434,7 @@ function PM:UpdateOptionsDisplay()
         yOffset = yOffset + 25
     end
     
-    -- Begrüßungen
+    -- Begrüßungen Label
     yOffset = yOffset + 10
     local greetLabel = self.contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     greetLabel:SetPoint("TOPLEFT", 0, -yOffset)
@@ -436,6 +442,7 @@ function PM:UpdateOptionsDisplay()
     greetLabel:SetTextColor(0, 1, 1)
     yOffset = yOffset + 25
     
+    -- Begrüßungen anzeigen
     for i, message in ipairs(greetMessages) do
         -- Spruch-Text
         local msgText = self.contentFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
