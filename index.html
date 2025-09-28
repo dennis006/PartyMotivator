@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PartyMotivator - World of Warcraft Addon</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .logo .accent {
+            color: #ff6600;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #00ff88;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero .version {
+            background: rgba(255, 102, 0, 0.2);
+            border: 1px solid #ff6600;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .section {
+            padding: 4rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 2rem 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #2a5298;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #00ff88;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card h3 {
+            color: #2a5298;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-card .icon {
+            color: #00ff88;
+            font-size: 1.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list .check {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .coming-soon {
+            background: linear-gradient(135deg, #ff6600, #ff8533);
+            color: white;
+        }
+
+        .coming-soon h2 {
+            color: white;
+        }
+
+        .coming-soon-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .coming-soon-card h3 {
+            color: white;
+        }
+
+        .coming-soon-card .icon {
+            color: #ffcc00;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat .number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00ff88;
+            display: block;
+        }
+
+        .stat .label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .download-section {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            color: white;
+        }
+
+        .download-section h2 {
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #ff6600, #ff8533);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 102, 0, 0.3);
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer .author {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">
+                Party<span class="accent">Motivator</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#coming-soon">Coming Soon</a></li>
+                <li><a href="#download">Download</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Party<span class="accent">Motivator</span></h1>
+                <p class="subtitle">Motivational Messages für World of Warcraft Dungeons</p>
+                <div class="version">Version 1.3.0</div>
+                <a href="#download" class="cta-button">
+                    <i class="fas fa-download"></i> Jetzt herunterladen
+                </a>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="container">
+                <h2>Aktuelle Features</h2>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <span class="number">40+</span>
+                        <span class="label">Start Messages</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">21+</span>
+                        <span class="label">Greeting Messages</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">20+</span>
+                        <span class="label">Mythic+ Messages</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">100%</span>
+                        <span class="label">Kostenlos</span>
+                    </div>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3><i class="fas fa-play icon"></i> Intelligente Dungeon-Erkennung</h3>
+                        <p>Automatische Erkennung von Normal-, Heroic-, Mythic- und Mythic+ Dungeons mit passenden Nachrichten.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> Sofortige Nachrichten für Normal/Heroic</li>
+                            <li><span class="check">✓</span> Countdown-Timing für Mythic+</li>
+                            <li><span class="check">✓</span> Doppel-Post-Schutz</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3><i class="fas fa-comments icon"></i> Motivationale Start-Messages</h3>
+                        <p>Über 40 professionell geschriebene Motivationsnachrichten für den Dungeon-Start.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> "We've got this."</li>
+                            <li><span class="check">✓</span> "One pull, one win."</li>
+                            <li><span class="check">✓</span> "Clean play beats speed."</li>
+                            <li><span class="check">✓</span> Vollständig anpassbar</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3><i class="fas fa-handshake icon"></i> Automatische Begrüßungen</h3>
+                        <p>Begrüßt neue Gruppenmitglieder automatisch mit zufälligen Nachrichten.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> "Hello—GLHF."</li>
+                            <li><span class="check">✓</span> "Welcome aboard."</li>
+                            <li><span class="check">✓</span> "Let's go."</li>
+                            <li><span class="check">✓</span> 21+ verschiedene Begrüßungen</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3><i class="fas fa-trophy icon"></i> Mythic+ Completion Messages</h3>
+                        <p>Spezielle Nachrichten basierend auf dem Erfolg deiner Mythic+ Runs.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> Erfolgs-Nachrichten bei Key-Upgrade</li>
+                            <li><span class="check">✓</span> Motivierende Nachrichten bei Misserfolg</li>
+                            <li><span class="check">✓</span> "GG! We timed it and upgraded the key 🎉"</li>
+                            <li><span class="check">✓</span> "Thanks for the key! We'll get it next time."</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3><i class="fas fa-cog icon"></i> Erweiterte Konfiguration</h3>
+                        <p>Vollständig anpassbare Einstellungen mit moderner UI.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> Chat-Kanal Auswahl (PARTY/INSTANCE_CHAT)</li>
+                            <li><span class="check">✓</span> Minimap-Button mit Positionierung</li>
+                            <li><span class="check">✓</span> Profile-System mit Export/Import</li>
+                            <li><span class="check">✓</span> Schöne Tab-basierte UI</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card">
+                        <h3><i class="fas fa-users icon"></i> Profile Management</h3>
+                        <p>Erstelle, speichere und teile verschiedene Konfigurationen.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">✓</span> Mehrere Profile erstellen</li>
+                            <li><span class="check">✓</span> Base64 Export/Import</li>
+                            <li><span class="check">✓</span> Profile zwischen Charakteren teilen</li>
+                            <li><span class="check">✓</span> Ein-Klick Profile-Wechsel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section coming-soon" id="coming-soon">
+            <div class="container">
+                <h2>Coming Soon Features</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin-bottom: 3rem; opacity: 0.9;">
+                    Neue Features, die in zukünftigen Updates kommen werden
+                </p>
+
+                <div class="features-grid">
+                    <div class="feature-card coming-soon-card">
+                        <h3><i class="fas fa-gift icon"></i> Holiday Messages</h3>
+                        <p>Spezielle Nachrichten für verschiedene Feiertage und Events.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">🎄</span> <strong>Weihnachten:</strong> "Ho ho ho, keys for all!"</li>
+                            <li><span class="check">🎄</span> <strong>Weihnachten:</strong> "Santa's sleigh is faster!"</li>
+                            <li><span class="check">🎃</span> <strong>Halloween:</strong> "Spooky keys!"</li>
+                            <li><span class="check">🎃</span> <strong>Halloween:</strong> "Trick or treat, but mostly trick!"</li>
+                            <li><span class="check">🎉</span> Und viele weitere Feiertage!</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card coming-soon-card">
+                        <h3><i class="fas fa-clock icon"></i> Time-based Messages</h3>
+                        <p>Nachrichten basierend auf der Tageszeit für mehr Abwechslung.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">🌅</span> <strong>Morgen:</strong> "Early morning grind!"</li>
+                            <li><span class="check">☕</span> <strong>Morgen:</strong> "Coffee and keys!"</li>
+                            <li><span class="check">🌆</span> <strong>Abend:</strong> "Evening dungeon session!"</li>
+                            <li><span class="check">🌙</span> <strong>Nacht:</strong> "Late night key pushing!"</li>
+                            <li><span class="check">⏰</span> Automatische Tageszeit-Erkennung</li>
+                        </ul>
+                    </div>
+
+                    <div class="feature-card coming-soon-card">
+                        <h3><i class="fas fa-magic icon"></i> Weitere geplante Features</h3>
+                        <p>Noch mehr Funktionen für die perfekte Dungeon-Erfahrung.</p>
+                        <ul class="feature-list">
+                            <li><span class="check">🎯</span> Dungeon-spezifische Nachrichten</li>
+                            <li><span class="check">📊</span> Statistiken und Erfolgs-Tracking</li>
+                            <li><span class="check">🎵</span> Sound-Effekte für Nachrichten</li>
+                            <li><span class="check">🌍</span> Mehrsprachige Unterstützung</li>
+                            <li><span class="check">🔧</span> Erweiterte Anpassungsoptionen</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="download-section" id="download">
+            <div class="container">
+                <h2>Jetzt herunterladen</h2>
+                <p>PartyMotivator ist kostenlos und einfach zu installieren</p>
+                
+                <div class="download-buttons">
+                    <a href="PartyMotivator v1.1.0.zip" class="download-btn" download>
+                        <i class="fas fa-download"></i>
+                        Version 1.3.0 herunterladen
+                    </a>
+                    <a href="https://github.com/xMethface/PartyMotivator" class="download-btn" target="_blank">
+                        <i class="fab fa-github"></i>
+                        GitHub Repository
+                    </a>
+                </div>
+
+                <div style="margin-top: 3rem; background: rgba(255, 255, 255, 0.1); padding: 2rem; border-radius: 15px;">
+                    <h3 style="margin-bottom: 1rem;">Installation</h3>
+                    <ol style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <li>Lade die ZIP-Datei herunter</li>
+                        <li>Entpacke sie in deinen World of Warcraft/Interface/AddOns Ordner</li>
+                        <li>Starte World of Warcraft neu</li>
+                        <li>Nutze <code>/pm</code> oder <code>/pmui</code> für die Konfiguration</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2024 PartyMotivator - Entwickelt von <span class="author">xMethface</span></p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">World of Warcraft ist ein eingetragenes Warenzeichen von Blizzard Entertainment, Inc.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
